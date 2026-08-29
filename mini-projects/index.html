@@ -1,18 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mini-projects</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — CS Hub</title>
+    <meta name="description" content="Bigger builds that bring together everything we learned. A proper calculator app and a full-stack todo list.">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-    <h1>Mini-Projects</h1>  
-    <ol>
 
-        <li><a href="./todo/">Todo list</a></li>
-        <!--add your projects -->
-    </ol>
-  
-    
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a class="nav-brand" href="../">
+      <span class="nav-brand-icon">&lt;/&gt;</span>
+      CS Hub
+    </a>
+    <ul class="nav-links">
+      <li><a href="../#math">Math</a></li>
+      <li><a href="../#physics">Physics</a></li>
+      <li><a href="../#games">Games</a></li>
+      <li><a href="../#projects">Projects</a></li>
+      <li><button type="button" class="search-trigger" onclick="csHub.openSearch()" title="Search (Ctrl+K)" aria-label="Open search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Search</button></li>
+    </ul>
+  </div>
+</nav>
+
+<main role="main">
+  <div class="container">
+    <a class="back-link" href="../">← Back to CS Hub</a>
+
+    <div class="page-header">
+      <span class="section-tag">Section 04</span>
+      <h1>Mini Projects</h1>
+      <p>Bigger builds that bring together everything we learned. A proper calculator app and a full-stack todo list.</p>
+      <span class="status-pill ok mt-4">working</span>
+    </div>
+
+    <div class="grid grid-2 mt-8">
+      <a class="card" href="./calculator/">
+        <div class="card-icon">🧮</div>
+        <h3>Calculator</h3>
+        <p>A keyboard-driven calculator that works just like the one on your phone. Supports basic operations, parentheses, and keeps a history of your calculations.</p>
+        <span class="card-meta">Try it →</span>
+      </a>
+      <a class="card" href="./todo/">
+        <div class="card-icon">📝</div>
+        <h3>Todo List</h3>
+        <p>A daily task manager with a Node.js/Express backend. Add tasks, check them off, delete what you don't need. The one full-stack piece of this site.</p>
+        <span class="card-meta">Open →</span>
+      </a>
+    </div>
+
+    <!-- About -->
+    <section class="section">
+      <div class="feature reveal">
+        <div class="feature-text">
+          <span class="section-tag">Why projects?</span>
+          <h2>Where theory meets practice</h2>
+          <p>The math tools and physics simulator taught us individual concepts. These projects forced us to put everything together — DOM manipulation, event handling, API calls, state management, and making things that actually work for daily use.</p>
+          <p class="mt-4">The calculator was our first real project. The todo list was our first time building something with a backend. Both have been updated and polished as we learned more.</p>
+        </div>
+        <div class="feature-visual">
+          <span class="placeholder">📦</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span>&lt;/&gt;</span>
+      CS Hub
+    </div>
+    <div class="footer-links">
+      <a href="../">Home</a>
+      <a href="../#math">Math</a>
+      <a href="../#physics">Physics</a>
+      <a href="../#games">Games</a>
+      <a href="../#projects">Projects</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var reveals = document.querySelectorAll('.reveal');
+  if (!reveals.length) return;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+    });
+  }, { threshold: 0.15 });
+  reveals.forEach(function(el) { observer.observe(el); });
+})();
+</script>
+<script src="../assets/security.js"></script>
+<script src="../assets/search.js"></script>
 </body>
 </html>

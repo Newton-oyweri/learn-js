@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator — Mini Projects — CS Hub</title>
+    <meta name="description" content="A keyboard-driven calculator app. Supports basic operations, parentheses, and keeps a history of your calculations.">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg">
+<link rel="stylesheet" href="../../assets/style.css">
+<style>
+  /* Overrides for this app's specific layout */
+  .calc-app {
+    max-width: 340px;
+  }
+  .calc-app .result-box {
+    font-size: 1.8rem;
+    min-height: 70px;
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a class="nav-brand" href="../../">
+      <span class="nav-brand-icon">&lt;/&gt;</span>
+      CS Hub
+    </a>
+    <ul class="nav-links">
+      <li><a href="../">Projects</a></li>
+      <li><a href="../../#math">Math</a></li>
+      <li><a href="../../#physics">Physics</a></li>
+      <li><button type="button" class="search-trigger" onclick="csHub.openSearch()" title="Search (Ctrl+K)" aria-label="Open search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Search</button></li>
+    </ul>
+  </div>
+</nav>
+
+<main role="main">
+  <div class="container">
+    <a class="back-link" href="../">← Back to Projects</a>
+
+    <div class="page-header">
+      <h1>Calculator</h1>
+      <p>Works with clicks and your keyboard. Use your numpad, number row, or the buttons below.</p>
+    </div>
+
+    <div class="calc-app mx-auto" style="margin: 0 auto;">
+      <div class="result-box" id="display" aria-live="polite">0</div>
+
+      <div class="calc-grid mt-4" role="grid" aria-label="Calculator buttons">
+        <button type="button" class="calc-btn clear" onclick="clearCalc()" aria-label="Clear">C</button>
+        <button type="button" class="calc-btn op" onclick="inputOp('(')" aria-label="Open parenthesis">(</button>
+        <button type="button" class="calc-btn op" onclick="inputOp(')')" aria-label="Close parenthesis">)</button>
+        <button type="button" class="calc-btn op" onclick="inputOp('/')" aria-label="Divide">÷</button>
+
+        <button type="button" class="calc-btn" onclick="inputDig('7')">7</button>
+        <button type="button" class="calc-btn" onclick="inputDig('8')">8</button>
+        <button type="button" class="calc-btn" onclick="inputDig('9')">9</button>
+        <button type="button" class="calc-btn op" onclick="inputOp('*')" aria-label="Multiply">×</button>
+
+        <button type="button" class="calc-btn" onclick="inputDig('4')">4</button>
+        <button type="button" class="calc-btn" onclick="inputDig('5')">5</button>
+        <button type="button" class="calc-btn" onclick="inputDig('6')">6</button>
+        <button type="button" class="calc-btn op" onclick="inputOp('-')" aria-label="Subtract">−</button>
+
+        <button type="button" class="calc-btn" onclick="inputDig('1')">1</button>
+        <button type="button" class="calc-btn" onclick="inputDig('2')">2</button>
+        <button type="button" class="calc-btn" onclick="inputDig('3')">3</button>
+        <button type="button" class="calc-btn op" onclick="inputOp('+')" aria-label="Add">+</button>
+
+        <button type="button" class="calc-btn wide" onclick="inputDig('0')">0</button>
+        <button type="button" class="calc-btn" onclick="inputDig('.')">.</button>
+        <button type="button" class="calc-btn equals" onclick="doCalc()" aria-label="Equals">=</button>
+      </div>
+
+      <div class="mt-6">
+        <h3 style="font-size:.85rem; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:1rem;">History</h3>
+        <div id="history" style="font-family:var(--mono); font-size:.85rem; line-height:2; color:var(--text-dim);">
+          No calculations yet.
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span>&lt;/&gt;</span>
+      CS Hub
+    </div>
+    <div class="footer-links">
+      <a href="../../">Home</a>
+      <a href="../">Projects</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var current = '0';
+  var justCalc = false;
+  var display = document.getElementById('display');
+  var hist = [];
+  var histEl = document.getElementById('history');
+
+  function show() { display.textContent = current || '0'; }
+
+  window.inputDig = function(d) {
+    if (justCalc) { current = ''; justCalc = false; }
+    if (current === '0' && d !== '.') current = d;
+    else current += d;
+    show();
+  };
+
+  window.inputOp = function(op) {
+    justCalc = false;
+    current += op;
+    show();
+  };
+
+  window.clearCalc = function() {
+    current = '0'; justCalc = false; show();
+  };
+
+  window.doCalc = function() {
+    try {
+      var expr = current.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+      if (!/^[\d+\-*/.() ]+$/.test(expr)) return;
+      var r = Function('"use strict"; return (' + expr + ')')();
+      if (!isFinite(r)) { display.textContent = 'Error'; current = '0'; return; }
+      r = Math.round(r * 1e10) / 1e10;
+      hist.unshift(current + ' = ' + r);
+      if (hist.length > 20) hist.pop();
+      histEl.innerHTML = hist.map(function(h) { return '<div>' + h + '</div>'; }).join('');
+      current = String(r);
+      justCalc = true;
+      show();
+    } catch(e) {
+      display.textContent = 'Error'; current = '0';
+    }
+  };
+
+  document.addEventListener('keydown', function(e) {
+    var searchOpen = document.getElementById('search-overlay') && document.getElementById('search-overlay').classList.contains('open');
+    var activeTag = document.activeElement && document.activeElement.tagName;
+    if (searchOpen || activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+
+    if (e.key >= '0' && e.key <= '9') { inputDig(e.key); return; }
+    if (e.key === '.') { inputDig('.'); return; }
+    if (e.key === '+') { inputOp('+'); return; }
+    if (e.key === '-') { inputOp('-'); return; }
+    if (e.key === '*') { inputOp('*'); return; }
+    if (e.key === '/') { e.preventDefault(); inputOp('/'); return; }
+    if (e.key === '(' || e.key === ')') { inputOp(e.key); return; }
+    if (e.key === 'Enter' || e.key === '=') { doCalc(); return; }
+    if (e.key === 'Escape') { clearCalc(); return; }
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (justCalc) justCalc = false;
+      current = current.length > 1 ? current.slice(0, -1) : '0';
+      show();
+    }
+  });
+})();
+</script>
+
+<script src="../../assets/security.js"></script>
+<script src="../../assets/search.js"></script>
+</body>
+</html>

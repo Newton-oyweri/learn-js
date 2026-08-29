@@ -3,19 +3,333 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>physics — learning-log</title>
+<title>Projectile Motion Simulator — Physics — CS Hub</title>
+    <meta name="description" content="An interactive projectile motion simulator. Set angle, velocity and gravity, then watch the projectile fly across a canvas.">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-<div class="wrap">
-  <a class="back-link" href="../">← learning-log/</a>
-  <p class="eyebrow">~/learning-log/physics</p>
-  <h1 style="color:var(--physics)">Physics</h1>
-  <p class="sub">Digital electronics and core physics concepts, explored through notes, diagrams, and small interactive simulations.</p>
-  <span class="status-pill">● folder scaffolded — first notes coming soon</span>
-  <hr class="rule">
-  <p class="eyebrow">what will live here</p>
-  <p class="sub" style="max-width:60ch">Circuit and logic-gate notes from digital electronics, plus lightweight browser simulations for mechanics concepts as they're learned.</p>
-</div>
+
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a class="nav-brand" href="../">
+      <span class="nav-brand-icon">&lt;/&gt;</span>
+      CS Hub
+    </a>
+    <ul class="nav-links">
+      <li><a href="../#math">Math</a></li>
+      <li><a href="../#physics">Physics</a></li>
+      <li><a href="../#games">Games</a></li>
+      <li><a href="../#projects">Projects</a></li>
+      <li><button type="button" class="search-trigger" onclick="csHub.openSearch()" title="Search (Ctrl+K)" aria-label="Open search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Search</button></li>
+    </ul>
+  </div>
+</nav>
+
+<main role="main">
+  <div class="container">
+    <a class="back-link" href="../">← Back to CS Hub</a>
+
+    <div class="page-header">
+      <span class="section-tag">Section 02</span>
+      <h1>Projectile Motion Simulator</h1>
+      <p>Set the launch angle, initial velocity, and gravity — then watch the projectile fly. The math runs in real time on a canvas.</p>
+      <span class="status-pill ok mt-4">working</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="panel mb-6">
+      <div class="sim-controls">
+        <label>
+          <span>Angle: <span class="sim-value" id="angle-val">45°</span></span>
+          <input type="range" id="angle" min="5" aria-label="Launch angle in degrees" max="85" value="45" oninput="updateLabels()">
+        </label>
+        <label>
+          <span>Velocity: <span class="sim-value" id="vel-val">50 m/s</span></span>
+          <input type="range" id="velocity" min="10" aria-label="Initial velocity in meters per second" max="100" value="50" oninput="updateLabels()">
+        </label>
+        <label>
+          <span>Gravity: <span class="sim-value" id="grav-val">9.8 m/s²</span></span>
+          <input type="range" id="gravity" min="1" aria-label="Gravitational acceleration in meters per second squared" max="25" value="9.8" step="0.1" oninput="updateLabels()">
+        </label>
+        <div style="display:flex; align-items:flex-end; gap:.75rem;">
+          <button type="button" class="btn btn-primary" onclick="launch()" style="white-space:nowrap;" aria-label="Launch projectile">Launch 🚀</button>
+          <button type="button" class="btn btn-outline" onclick="resetSim()" style="white-space:nowrap;" aria-label="Reset simulation">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="sim-canvas-wrap">
+      <canvas id="sim" width="800" height="400" role="img" aria-label="Projectile motion simulation canvas showing trajectory"></canvas>
+    </div>
+
+    <!-- Stats -->
+    <div class="panel mt-6">
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-label">Max Height</div>
+          <div class="stat-value" id="stat-height" aria-live="polite">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Range</div>
+          <div class="stat-value" id="stat-range" aria-live="polite">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Flight Time</div>
+          <div class="stat-value" id="stat-time" aria-live="polite">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Status</div>
+          <div class="stat-value" id="stat-status" aria-live="polite" style="font-size:1rem;">Ready</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <section class="section">
+      <div class="feature">
+        <div class="feature-text">
+          <span class="section-tag">The math</span>
+          <h2>How projectile motion works</h2>
+          <p>We break the initial velocity into horizontal (v₀ cos θ) and vertical (v₀ sin θ) components. The horizontal velocity stays constant (ignoring air resistance), while gravity pulls the vertical velocity down at 9.8 m/s².</p>
+          <p class="mt-4">The projectile reaches max height when vertical velocity hits zero, and lands when vertical position returns to zero. We verified our results against the textbook formulas.</p>
+        </div>
+        <div class="feature-visual" style="font-size:1rem; padding:1.5rem; font-family:var(--mono); color:var(--text-dim); text-align:left; line-height:2;">
+          <div>x(t) = v₀ · cos(θ) · t</div>
+          <div>y(t) = v₀ · sin(θ) · t − ½gt²</div>
+          <div style="margin-top:1rem; color:var(--accent); font-weight:600;">T = 2v₀sin(θ) / g</div>
+          <div style="color:var(--accent); font-weight:600;">R = v₀²sin(2θ) / g</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span>&lt;/&gt;</span>
+      CS Hub
+    </div>
+    <div class="footer-links">
+      <a href="../">Home</a>
+      <a href="../#physics">Physics</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  var canvas = document.getElementById('sim');
+  var ctx = canvas.getContext('2d');
+  var animId = null;
+  var trajectory = [];
+  var animIndex = 0;
+  var isAnimating = false;
+
+  // Scale: 1 meter = 3 pixels, with origin at bottom-left with padding
+  var PADDING = 40;
+  var GROUND_Y = canvas.height - PADDING;
+  var SCALE = 3;
+
+  function toCanvasX(m) { return PADDING + m * SCALE; }
+  function toCanvasY(m) { return GROUND_Y - m * SCALE; }
+
+  // Draw the ground, grid, axes
+  function drawScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background
+    ctx.fillStyle = '#1e1e2e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Ground
+    ctx.strokeStyle = '#45475a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y);
+    ctx.lineTo(canvas.width, GROUND_Y);
+    ctx.stroke();
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(69, 71, 90, 0.3)';
+    ctx.lineWidth = 1;
+    // Vertical
+    for (var x = PADDING; x < canvas.width; x += 50) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, GROUND_Y);
+      ctx.stroke();
+    }
+    // Horizontal
+    for (var y = GROUND_Y; y > 0; y -= 50) {
+      ctx.beginPath();
+      ctx.moveTo(PADDING, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+
+    // Axis labels
+    ctx.fillStyle = '#6c7086';
+    ctx.font = '11px JetBrains Mono, monospace';
+    // Distance markers (every ~50px = ~16.7m)
+    for (var mx = 0; mx <= 250; mx += 50) {
+      var px = toCanvasX(mx);
+      if (px < canvas.width - 10) {
+        ctx.fillText(mx + 'm', px - 10, GROUND_Y + 18);
+      }
+    }
+    // Height markers
+    for (var my = 0; my <= 120; my += 50) {
+      if (my > 0) {
+        var py = toCanvasY(my);
+        if (py > 10) {
+          ctx.fillText(my + 'm', 5, py + 4);
+        }
+      }
+    }
+
+    // Origin dot
+    ctx.fillStyle = '#a6e3a1';
+    ctx.beginPath();
+    ctx.arc(toCanvasX(0), GROUND_Y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Compute trajectory points
+  function computeTrajectory(v0, angleDeg, g) {
+    var angleRad = angleDeg * Math.PI / 180;
+    var vx = v0 * Math.cos(angleRad);
+    var vy = v0 * Math.sin(angleRad);
+    var totalTime = (2 * vy) / g;
+    var dt = totalTime / 300; // 300 steps
+    var points = [];
+
+    for (var t = 0; t <= totalTime; t += dt) {
+      var x = vx * t;
+      var y = vy * t - 0.5 * g * t * t;
+      if (y < 0) { y = 0; points.push({x: x, y: y}); break; }
+      points.push({x: x, y: y});
+    }
+
+    return points;
+  }
+
+  function drawTrail(pts, upTo) {
+    if (upTo < 1) return;
+    ctx.strokeStyle = '#a6e3a1';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(toCanvasX(pts[0].x), toCanvasY(pts[0].y));
+    for (var i = 1; i <= Math.min(upTo, pts.length - 1); i++) {
+      ctx.lineTo(toCanvasX(pts[i].x), toCanvasY(pts[i].y));
+    }
+    ctx.stroke();
+  }
+
+  function drawProjectile(pt) {
+    // Glow
+    ctx.shadowColor = '#a6e3a1';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = '#a6e3a1';
+    ctx.beginPath();
+    ctx.arc(toCanvasX(pt.x), toCanvasY(pt.y), 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  function animate() {
+    if (animIndex >= trajectory.length) {
+      isAnimating = false;
+      document.getElementById('stat-status').textContent = 'Done';
+      return;
+    }
+
+    drawScene();
+    drawTrail(trajectory, animIndex);
+    drawProjectile(trajectory[animIndex]);
+
+    animIndex += 2;
+    animId = requestAnimationFrame(animate);
+  }
+
+  // Update label displays
+  window.updateLabels = function() {
+    document.getElementById('angle-val').textContent = document.getElementById('angle').value + '°';
+    document.getElementById('vel-val').textContent = document.getElementById('velocity').value + ' m/s';
+    var g = parseFloat(document.getElementById('gravity').value);
+    document.getElementById('grav-val').textContent = g + ' m/s²';
+  };
+
+  // Launch!
+  window.launch = function() {
+    if (isAnimating) {
+      cancelAnimationFrame(animId);
+    }
+
+    var angleDeg = parseFloat(document.getElementById('angle').value);
+    var v0 = parseFloat(document.getElementById('velocity').value);
+    var g = parseFloat(document.getElementById('gravity').value);
+    var angleRad = angleDeg * Math.PI / 180;
+
+    // Compute analytically
+    var totalTime = (2 * v0 * Math.sin(angleRad)) / g;
+    var maxH = (v0 * Math.sin(angleRad)) * (v0 * Math.sin(angleRad)) / (2 * g);
+    var range = (v0 * v0 * Math.sin(2 * angleRad)) / g;
+
+    document.getElementById('stat-height').textContent = maxH.toFixed(1) + ' m';
+    document.getElementById('stat-range').textContent = range.toFixed(1) + ' m';
+    document.getElementById('stat-time').textContent = totalTime.toFixed(2) + ' s';
+    document.getElementById('stat-status').textContent = 'Flying...';
+
+    // Reset scale before auto-scaling to prevent compounding
+    SCALE = 3;
+    var neededWidth = PADDING + range * SCALE + 20;
+    var neededHeight = PADDING + maxH * SCALE + 40;
+    if (neededWidth > canvas.width) {
+      SCALE = (canvas.width - PADDING - 20) / range;
+    }
+    if (toCanvasY(maxH) < 20) {
+      SCALE = (GROUND_Y - 40) / maxH;
+    }
+
+    trajectory = computeTrajectory(v0, angleDeg, g);
+    animIndex = 0;
+    isAnimating = true;
+    animate();
+  };
+
+  window.resetSim = function() {
+    if (isAnimating) {
+      cancelAnimationFrame(animId);
+      isAnimating = false;
+    }
+    SCALE = 3; // Reset auto-scale
+    trajectory = [];
+    animIndex = 0;
+    drawScene();
+    document.getElementById('stat-height').textContent = '—';
+    document.getElementById('stat-range').textContent = '—';
+    document.getElementById('stat-time').textContent = '—';
+    document.getElementById('stat-status').textContent = 'Ready';
+  };
+
+  // Reset SCALE before each launch so auto-scale doesn't compound
+  // (SCALE is set in launch() based on current params)
+
+  // Initial draw
+  drawScene();
+})();
+</script>
+
+<script src="../assets/security.js"></script>
+<script src="../assets/search.js"></script>
 </body>
 </html>
